@@ -1,2 +1,3 @@
 # auth_check
-Lorem
+welcome
+

@@ -1,0 +1,9 @@
+[
+    {
+        "timestamp": "2026-07-21T18:50:57.331565",
+        "user": "rad_rat",
+        "package": "malicious-pkg",
+        "triggering_reason": "Unacceptable Risk Value (100/100) | CRITICAL: Reputation tables missing. Failing closed to prevent unsafe execution.",
+        "action": "Action: BLOCKED"
+    }
+]
