@@ -3,12 +3,12 @@
         "is_malicious": false,
         "release_date": "2020-01-15"
     },
+    "pip": {
+        "is_malicious": false,
+        "release_date": "2020-01-15"
+    },
     "malicious-pkg": {
         "is_malicious": true,
         "release_date": "2026-07-20"
-    },
-    "sus-pkg": {
-        "is_malicious": false,
-        "release_date": "2026-07-19"
     }
 }

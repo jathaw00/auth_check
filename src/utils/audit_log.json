@@ -5,5 +5,47 @@
         "package": "malicious-pkg",
         "triggering_reason": "Unacceptable Risk Value (100/100) | CRITICAL: Reputation tables missing. Failing closed to prevent unsafe execution.",
         "action": "Action: BLOCKED"
+    },
+    {
+        "timestamp": "2026-07-30T21:38:48.594585",
+        "user": "rad_rat",
+        "package": "requests",
+        "triggering_reason": "CRITICAL: Reputation tables missing. Failing closed to prevent unsafe execution.",
+        "action": "Action: BLOCKED BY PROXY"
+    },
+    {
+        "timestamp": "2026-07-30T21:38:49.122170",
+        "user": "rad_rat",
+        "package": "pip",
+        "triggering_reason": "CRITICAL: Reputation tables missing. Failing closed to prevent unsafe execution.",
+        "action": "Action: BLOCKED BY PROXY"
+    },
+    {
+        "timestamp": "2026-07-30T21:45:05.734445",
+        "user": "rad_rat",
+        "package": "requests",
+        "triggering_reason": "CRITICAL: Reputation tables missing. Failing closed to prevent unsafe execution.",
+        "action": "Action: BLOCKED BY PROXY"
+    },
+    {
+        "timestamp": "2026-07-30T21:45:06.269908",
+        "user": "rad_rat",
+        "package": "pip",
+        "triggering_reason": "CRITICAL: Reputation tables missing. Failing closed to prevent unsafe execution.",
+        "action": "Action: BLOCKED BY PROXY"
+    },
+    {
+        "timestamp": "2026-07-30T21:47:08.565767",
+        "user": "rad_rat",
+        "package": "requests",
+        "triggering_reason": "CRITICAL: Reputation tables missing. Failing closed to prevent unsafe execution.",
+        "action": "Action: BLOCKED BY PROXY"
+    },
+    {
+        "timestamp": "2026-07-30T21:47:09.100973",
+        "user": "rad_rat",
+        "package": "pip",
+        "triggering_reason": "CRITICAL: Reputation tables missing. Failing closed to prevent unsafe execution.",
+        "action": "Action: BLOCKED BY PROXY"
     }
 ]

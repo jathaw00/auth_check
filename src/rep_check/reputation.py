@@ -11,7 +11,8 @@ def check_reputation(package_name):
     reasons_list = []
     
     # Locate and load the mock database
-    db_path = os.path.join(os.path.dirname(__file__), "mock_db.json")
+    current_dir = os.path.dirname(os.path.abspath(__file__))
+    db_path = os.path.join(current_dir, "mock_database.json")
     
     if not os.path.exists(db_path):
         # FAIL CLOSED: If we can't verify reputation, we do not allow installation.
