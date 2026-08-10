@@ -47,5 +47,12 @@
         "package": "pip",
         "triggering_reason": "CRITICAL: Reputation tables missing. Failing closed to prevent unsafe execution.",
         "action": "Action: BLOCKED BY PROXY"
+    },
+    {
+        "timestamp": "2026-07-30T22:16:21.053469",
+        "user": "rad_rat",
+        "package": "requests",
+        "triggering_reason": "Failed reputation check: Flagged as known malware.",
+        "action": "Action: BLOCKED BY PROXY"
     }
 ]

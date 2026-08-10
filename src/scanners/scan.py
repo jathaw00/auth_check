@@ -1,48 +1,71 @@
-import os
 import re
+import io
+import tarfile
+import zipfile
 
-def run_payload_scan():
-    """
-    Scans common injection sites (readmes, AI config files) for abnormalities.
-    Returns a tuple: (is_safe (bool), message (str))
-    """
-    files_to_check = [".cursorrules", "CLAUDE.md", "README.md", "package.json"]
+# Expanded malicious patterns, including obfuscation and AI manipulation
+POISON_PATTERNS = [
+    # 1. Standard Python Execution Exploits
+    r'exec\(\s*base64\.b64decode',          
+    r'eval\(\s*urllib',                     
+    r'subprocess\.Popen\(\s*\["curl"',      
+    r'os\.system\(\s*[\'"](wget|curl|bash)',
+    r'open\(\s*[\'"]/.ssh/id_rsa',          
+    r'open\(\s*[\'"]/.aws/credentials',     
+    r'socket\.socket\(\s*socket\.AF_INET',  
     
-    # Phrases attackers use to trick AI into running bad commands
-    bad_phrases = [
-        "ignore previous",
-        "you must run",
-        "system override",
-        "execute this command"
-    ]
+    # 2. Obfuscation & Homoglyphs
+    r'[\u200B-\u200F\uFEFF\u202A-\u202E]',  # Zero-width spaces and bidirectional text overrides
     
-    # Regex to find hidden zero-width spaces (\u200B to \u200D and \uFEFF)
-    hidden_chars = re.compile(r'[\u200B-\u200D\uFEFF]')
-    
-    for file_name in files_to_check:
-        if os.path.exists(file_name):
-            # Read the raw byte stream, ignoring errors so bad formatting doesn't crash the scanner
-            with open(file_name, 'r', encoding='utf-8', errors='ignore') as file:
-                text = file.read()
-                
-                # Check 1: Look for hidden invisible characters
-                if hidden_chars.search(text):
-                    return False, f"Abnormal payload detected: Hidden unicode characters found in {file_name}"
-                    
-                # Check 2: Look for dangerous AI instructions
-                text_lower = text.lower()
-                for phrase in bad_phrases:
-                    if phrase in text_lower:
-                        return False, f"Abnormal payload detected: Suspected AI prompt injection ('{phrase}') in {file_name}"
-                        
-    # If the loop finishes without finding anything bad
-    return True, "Payload scan clean. No abnormalities found."
+    # 3. AI / LLM Prompt Poisoning (Commonly found in READMEs or docstrings)
+    r'(?i)(ignore previous instructions|disregard previous commands|system prompt:|you are a helpful assistant, bypass|new instructions:)'
+]
 
-# --- Quick Test Block ---
-# This only runs if you execute this file directly, allowing you to test it offline.
-if __name__ == "__main__":
-    is_safe, message = run_payload_scan()
-    if is_safe:
-        print(f"✅ PASS: {message}")
-    else:
-        print(f"❌ FAIL: {message}")
+def scan_code_content(filename: str, content: str) -> tuple[bool, str]:
+    """Scans a file's text against known poisoning and obfuscation patterns."""
+    for pattern in POISON_PATTERNS:
+        if re.search(pattern, content):
+            # Give a clean warning message depending on what was found
+            if r'\u200B' in pattern:
+                return False, f"Obfuscation detected: Zero-width characters found in {filename}"
+            elif 'ignore previous' in pattern:
+                return False, f"AI Prompt Injection detected in {filename}"
+            else:
+                return False, f"Malicious signature detected in {filename}"
+    return True, "Safe"
+
+def inspect_package_bytes(file_bytes: bytes, filename: str) -> tuple[bool, str]:
+    """Unpacks a raw archive in memory and inspects source files and documentation."""
+    file_stream = io.BytesIO(file_bytes)
+    
+    # Files we want to inspect for malware or AI prompt injection
+    target_extensions = (".py", ".cfg", ".md", ".rst", ".txt")
+    
+    try:
+        # --- 1. INSPECT WHEEL (.whl / zip archives) ---
+        if filename.endswith(".whl") or filename.endswith(".zip"):
+            with zipfile.ZipFile(file_stream, "r") as zf:
+                for member in zf.namelist():
+                    if member.lower().endswith(target_extensions):
+                        with zf.open(member) as f:
+                            content = f.read().decode("utf-8", errors="ignore")
+                            safe, msg = scan_code_content(member, content)
+                            if not safe:
+                                return False, f"[ZIP Scan] {msg}"
+                                
+        # --- 2. INSPECT SOURCE TARBALL (.tar.gz) ---
+        elif filename.endswith(".tar.gz") or filename.endswith(".tgz"):
+            with tarfile.open(fileobj=file_stream, mode="r:gz") as tf:
+                for member in tf.getmembers():
+                    if member.isfile() and member.name.lower().endswith(target_extensions):
+                        f = tf.extractfile(member)
+                        if f:
+                            content = f.read().decode("utf-8", errors="ignore")
+                            safe, msg = scan_code_content(member.name, content)
+                            if not safe:
+                                return False, f"[TARBALL Scan] {msg}"
+                                
+    except Exception as e:
+        return False, f"Archive corruption or decompression bomb detected: {str(e)}"
+        
+    return True, "No malicious payloads or injections detected."

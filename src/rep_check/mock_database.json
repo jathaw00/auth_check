@@ -1,6 +1,6 @@
 {
     "requests": {
-        "is_malicious": false,
+        "is_malicious": true,
         "release_date": "2020-01-15"
     },
     "pip": {
